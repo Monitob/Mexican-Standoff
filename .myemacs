@@ -14,14 +14,16 @@
 (setq config_files "/usr/share/emacs/site-lisp/")
 (setq load-path (append (list nil config_files) load-path))
 
-(load "list.el")
-(load "string.el")
-(load "comments.el")
-(load "header.el")
 
 ; Set default emacs configuration
+(global-font-lock-mode 't)
+(require 'ansi-color)
+(defun colorize-compilation-buffer ()
+  (toggle-read-only)
+  (ansi-color-apply-on-region (point-min) (point-max))
+  (toggle-read-only))
+(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 (set-language-environment "UTF-8")
-(setq-default font-lock-global-modes nil)
 (setq-default line-number-mode nil)
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode t)
@@ -33,14 +35,11 @@
                              64 68 72 76 80 84 88 92 96 100 104 108 112 116 120))
 
 (defun my-c-mode-hook ()
-(c-set-style "my-c-style")
 (c-set-offset 'substatement-open '0) ; brackets should be at same indentation level as the statements they open
 (c-set-offset 'inline-open '+)
 (c-set-offset 'block-open '+)
 (c-set-offset 'brace-list-open '+)   ; all "opens" should be indented by the c-indent-level
 (c-set-offset 'case-label '+))       ; indent case labels by c-indent-level, too
-
-(add-hook 'c-mode-hook 'my-c-mode-hook)
 
 (add-hook 'c-mode-hook 'my-c-mode-hook)
 
@@ -50,49 +49,49 @@
 	(insert "()")
 	(backward-char 1))
 
-(defun ffr-insert-square-brackets ()
-   "insert brackets and go between them"
-   (interactive)
-   (insert "[]")
-   (backward-char 1))
-
 (defun ffr-insert-braces ()
    "insert curly braces and go between them"
    (interactive)
    (insert "{}")
    (backward-char 2))
-      
-(defun ffr-insert-simple-quotes ()
-   "insert simple quotes and go between them"
-   (interactive)
-   (insert "''")
-   (backward-char 1))
-			       
-(defun ffr-insert-double-quotes ()
-"insert double quotes and go between them"
-   (interactive)
-   (insert "\"\"")
-   (backward-char 1))
-			        
-(defun ffr-insert-invert-quotes ()
-"insert inverted quotes and go between them"
-   (interactive)
-   (insert "``")
-   (backward-char 1))
-							       
-(defun ffr-insert-angle-brackets ()
-	"insert > and go between them"
-	(interactive)
-	(insert "<>")
-	(backward-char 1))
 
 (add-hook 'c-mode-common-hook (lambda () (local-set-key "("  'ffr-insert-parentheses)))
-(add-hook 'c-mode-common-hook (lambda () (local-set-key "["  'ffr-insert-square-brackets)))
 (add-hook 'c-mode-common-hook (lambda () (local-set-key "{"  'ffr-insert-braces)))
-(add-hook 'c-mode-common-hook (lambda () (local-set-key "'"  'ffr-insert-simple-quotes)))
-(add-hook 'c-mode-common-hook (lambda () (local-set-key "\""  'ffr-insert-double-quotes)))
-(add-hook 'c-mode-common-hook (lambda () (local-set-key "`"  'ffr-insert-invert-quotes)))
-(add-hook 'c-mode-common-hook (lambda () (local-set-key "<"  'ffr-insert-angle-brackets)))
 
-(setq backup-directory-alist '(("" . "~/.emacs.d/")))
-;*******************************************************************************;
+(add-hook 'c-mode-common-hook (lambda() (setq show-trailing-whitespace t)))
+
+;; Faire apparaître la position du curseur dans la ligne modale
+(setq column-number-mode t)
+(setq line-number-mode t)
+
+; make carriage returns blue and tabs green
+(custom-set-faces
+ '(my-carriage-return-face ((((class color)) (:background "blue"))) t)
+ '(my-tab-face ((((class color)) (:background "green"))) t)
+ )
+; add custom font locks to all buffers and all files
+(add-hook
+ 'font-lock-mode-hook
+ (function
+  (lambda ()
+    (setq
+     font-lock-keywords
+     (append
+      font-lock-keywords
+      '(
+        ("\r" (0 'my-carriage-return-face t))
+        ("\s\s" (0 'my-tab-face t))
+        ))))))
+
+; make characters after column 80 purple
+(setq whitespace-style
+  (quote (face trailing tab-mark lines-tail)))
+(add-hook 'find-file-hook 'whitespace-mode)
+
+; transform literal tabs into a right-pointing triangle
+(setq
+ whitespace-display-mappings ;http://ergoemacs.org/emacs/whitespace-mode.html
+ '(
+   (tab-mark 9 [9654 9] [92 9])
+   ;others substitutions...
+   ))
