@@ -42,6 +42,20 @@
 (c-set-offset 'case-label '+))       ; indent case labels by c-indent-level, too
 
 (add-hook 'c-mode-hook 'my-c-mode-hook)
+(defun my-backup-file-name (fpath)
+  "Return a new file path of a given file path.
+If the new path's directories does not exist, create them."
+  (let* (
+        (backupRootDir "~/.emacs.d/")
+        (filePath (replace-regexp-in-string "[A-Za-z]:" "" fpath )) ; remove Windows driver letter in path, ⁖ “C:”
+        (backupFilePath (replace-regexp-in-string "//" "/" (concat backupRootDir filePath "~") ))
+        )
+    (make-directory (file-name-directory backupFilePath) (file-name-directory backupFilePath))
+    backupFilePath
+  )
+)
+
+(setq make-backup-file-name-function 'my-backup-file-name)
 
 (defun ffr-insert-parentheses ()
 	"insert parentheses and go between them"

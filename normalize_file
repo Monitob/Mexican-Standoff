@@ -1,0 +1,9 @@
+:%s/\v(\s+$)|( +\ze\t)
+%s/^ *//
+<ESC> gg=G
+ 
+ or 
+
+ %le
+<ESC> gg=G
+:%s/\v(\s+$)|( +\ze\t)

@@ -33,3 +33,4 @@ autocmd BufWinLeave * call clearmatches()
 set backup
 set backupdir=~/.emacs.d/
 set directory=~/.emacs.d/
+set statusline+=col:\ %c,
